@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.geometry.Insets?>
+<BorderPane xmlns="http://javafx.com/javafx/8"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.FoodHub.OrderTrackerController">
+
+    <top>
+        <Label text="Order Manager"
+               style="-fx-font-size: 20px; -fx-font-weight: bold;"
+               BorderPane.alignment="CENTER"/>
+    </top>
+
+    <center>
+        <TableView fx:id="orderTable" prefHeight="400" prefWidth="600">
+            <columns>
+                <TableColumn fx:id="idColumn" text="Order ID" prefWidth="100"/>
+                <TableColumn fx:id="dateColumn" text="Order Date" prefWidth="200"/>
+                <TableColumn fx:id="typeColumn" text="Order Type" prefWidth="200"/>
+                <TableColumn fx:id="statusColumn" text="Order Status" prefWidth="200"/>
+                <TableColumn fx:id="deliveryStatusColumn" text="Delivery Status" prefWidth="200"/>
+
+            </columns>
+        </TableView>
+    </center>
+
+    <bottom>
+        <HBox spacing="10" alignment="CENTER" BorderPane.alignment="CENTER">
+            <padding>
+                <Insets top="10" bottom="10" left="10" right="10"/>
+            </padding>
+
+            <Label fx:id="totalPriceLabel" text="Total Price: $0.00">
+                <HBox.margin>
+                    <Insets right="30" />
+                </HBox.margin>
+            </Label>
+
+
+            <Label text="New Status:"/>
+            <ComboBox fx:id="statusBox" prefWidth="150"/>
+
+            <Label text="Delivery Status:"/>
+            <ComboBox fx:id="deliveryStatusBox" prefWidth="150"/>
+
+            <Button fx:id="updateButton" text="Update Status" onAction="#handleUpdateStatus"/>
+            <Button fx:id="displayOrder" text="Display Order" onAction="#handleDisplayOrder"/>
+            <Button fx:id="exportButton" text="Export Orders" onAction="#handleExportOrders"/>
+            <Button fx:id="createOrder" text="Create Order" style="-fx-background-color: #28a745; -fx-text-fill: white" onAction="#handleCreateOrder"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>
