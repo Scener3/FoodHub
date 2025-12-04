@@ -5,13 +5,18 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -118,6 +123,61 @@ public class OrderTrackerView {
         Scene scene = new Scene(root, 600, 450);
         stage.setScene(scene);
         stage.show();
+    }
+
+    public Callback<TableColumn<Order, String>, TableCell<Order, String>> getOrderTypeCellFactory(){
+        return column -> new TableCell<Order, String>(){
+                private final ImageView imageView = new ImageView();
+                private final Label label = new Label();
+                private final javafx.scene.layout.HBox hbox = new javafx.scene.layout.HBox(5);
+
+                // Caching the icon instead of so it does not reload constantly
+                private java.util.Map<String, Image> imageCache = new java.util.HashMap<>();
+                {
+                    hbox.setAlignment(Pos.CENTER_LEFT);
+                    hbox.getChildren().addAll(imageView, label);
+                    imageView.setFitWidth(30);
+                    imageView.setFitHeight(30);
+                }
+
+                /**
+                 * Updates the cell display with an order type icon and label.
+                 * Loads appropriate icon from classpath
+                 * Uses text only display if icon resource is not found.
+                 *
+                 * @param item the order type string value to display
+                 * @param empty true if the cell is empty, false otherwise
+                 */
+                @Override
+                protected void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || getTableRow() == null || getTableRow().getItem() == null) {
+                        setGraphic(null);
+                        return;
+                    }
+                    Order order = getTableRow().getItem();
+                    label.setText(order.getOrderType().toString());
+                    OrderTypeIcon icon = order.getOrderTypeIcon();
+                    String path = icon.getImagePath();
+
+                    Image img = imageCache.get(path);
+                    if (img == null){
+                        try(InputStream imageStream = getClass().getResourceAsStream(path)) {
+                            if (imageStream != null){
+                                img = new Image(imageStream);
+                                imageCache.put(path, img);
+                            }
+                        } catch(Exception e){}
+                    }
+
+                    if (img != null){
+                        imageView.setImage(img);
+                        setGraphic(hbox);
+                    } else{
+                        setGraphic(label);
+                    }
+                }
+        };
     }
 
 }

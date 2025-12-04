@@ -6,6 +6,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
@@ -70,11 +71,30 @@ public class OrderTrackerController {
 
     /**
      * Will initialize with SavedDataForLoad.json being processed
-     *
-     *
      * **/
     @FXML
     public void initialize() throws IOException, ParseException, ParserConfigurationException, SAXException {
+        setupTableColumns();
+        setupDropDowns();
+        setupListener();
+        loadInitData();
+
+        fileListenerService = new FetchFilesService(allOrdersList, orderManager, process, accesser, () -> {
+            updatePriceDisplay();
+            saveData.save(orderManager, filePath);
+        });
+        fileListenerThread = new Thread(fileListenerService, "FileWatcherThread");
+        fileListenerThread.setDaemon(true);
+        fileListenerThread.start();
+    }
+
+    public void shutdown(){
+        if (fileListenerService != null){
+            fileListenerService.stop();
+        }
+    }
+
+    private void setupTableColumns(){
         idColumn.setCellValueFactory(new PropertyValueFactory<>("orderID"));
         statusColumn.setCellValueFactory(new PropertyValueFactory<>("orderStatus"));
         dateColumn.setCellValueFactory(cellData -> {
@@ -91,95 +111,42 @@ public class OrderTrackerController {
         typeColumn.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().getOrderType().toString()));
 
-        typeColumn.setCellFactory(column -> new TableCell<Order, String>() {
-            private final ImageView imageView = new ImageView();
-            private final Label label = new Label();
-            private final javafx.scene.layout.HBox hbox = new javafx.scene.layout.HBox(5);
+        typeColumn.setCellFactory(view.getOrderTypeCellFactory());
+    }
 
-            {
-                hbox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
-                hbox.getChildren().addAll(imageView, label);
-            }
+    private void setupDropDowns(){
+        // Setting Status Box
+        List<OrderStatus> statuses = Arrays.asList(OrderStatus.values());
+        statusBox.setItems(FXCollections.observableArrayList(statuses));
 
-            /**
-             * Updates the cell display with an order type icon and label.
-             * Loads appropriate icon from classpath
-             * Uses text only display if icon resource is not found.
-             *
-             * @param item the order type string value to display
-             * @param empty true if the cell is empty, false otherwise
-             */
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || getTableRow() == null) {
-                    setGraphic(null);
-                } else {
-                    Order order = getTableRow().getItem();
-                    if (order != null) {
-                        OrderTypeIcon icon = order.getOrderTypeIcon();
-                        label.setText(order.getOrderType().toString());
-                        try {
-                            InputStream imageStream = getClass().getResourceAsStream(icon.getImagePath());
-                            if (imageStream != null) {
-                                imageView.setImage(new Image(imageStream));
-                                imageView.setFitWidth(30);
-                                imageView.setFitHeight(30);
-                                setGraphic(hbox);
-                            } else {
-                                label.setText(order.getOrderType().toString());
-                                setGraphic(label);
-                            }
-                        } catch (Exception e) {
-                            label.setText(order.getOrderType().toString());
-                            setGraphic(label);
-                        }
-                    }
-                }
-            }
+        // Delivery Status Box
+        deliveryStatusBox.setItems(FXCollections.observableArrayList(DeliveryStatus.values()));
+        deliveryStatusBox.setDisable(true);
+    }
+
+    private void setupListener(){
+        orderTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            updateUIForSelectedOrder(newSelection);
         });
+    }
 
-
-        deliveryStatusColumn.setCellValueFactory(order ->
-                new SimpleStringProperty(order.getValue().getDeliveryStatus() != null ?
-                        order.getValue().getDeliveryStatus().toString() : ""));
-
+    private void loadInitData() throws IOException, ParseException, ParserConfigurationException, SAXException {
         if (filePath.exists() && filePath.length() > 0) {
             allOrders = process.processSingleOrder("SavedDataForLoad.json");
             allOrders.addAll(process.processAllOrder());
-            orderManager.setAllOrder(allOrders);
         }
         else
         {
             allOrders = process.processAllOrder();
-            orderManager.setAllOrder(allOrders);
         }
 
+        orderManager.setAllOrder(allOrders);
         allOrdersList = FXCollections.observableArrayList(allOrders);
         orderTable.setItems(allOrdersList);
-        List<OrderStatus> statuses = Arrays.asList(OrderStatus.values());
-        statusBox.setItems(FXCollections.observableArrayList(statuses));
-        saveData.save(orderManager, filePath);
-        deliveryStatusBox.setItems(FXCollections.observableArrayList(DeliveryStatus.values()));
-        deliveryStatusBox.setDisable(true);
-        orderTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
-            updateUIForSelectedOrder(newSelection);
-        });
 
-        fileListenerService = new FetchFilesService(allOrdersList, orderManager, process, accesser, () -> {
-            updatePriceDisplay();
-            saveData.save(orderManager, filePath);
-        });
-        fileListenerThread = new Thread(fileListenerService, "FileWatcherThread");
-        fileListenerThread.setDaemon(true);
-        fileListenerThread.start();
+
         updatePriceDisplay();
-    }
-
-    public void shutdown(){
-        if (fileListenerService != null){
-            fileListenerService.stop();
-        }
+        saveData.save(orderManager, filePath);
     }
 
     public void handleExportOrders(ActionEvent actionEvent) {
