@@ -237,9 +237,11 @@ public class OrderTrackerController {
     }
 
     public void handleCreateOrder(ActionEvent actionEvent){
+        OrderManager tempOrderManager = new OrderManager();
         List<FoodItem> menuOption = orderManager.getMenuList();
         view.showCreateOrderPopup(menuOption, (selectedItems) ->  {
-            Order newOrder = orderManager.createNewOrder(selectedItems);
+            Order newOrder = tempOrderManager.createNewOrder(selectedItems);
+            newOrder.setOrderID(orderManager.getOrders().size());
             process.writeToJSON(newOrder);
         });
     }

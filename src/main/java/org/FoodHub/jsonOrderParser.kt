@@ -25,7 +25,13 @@ object jsonOrderParser : OrderParserInterface {
                         }
                     } else if (orderLevelObject is JSONObject) {
                         val orderData = orderLevelObject["order"] as? JSONObject ?: orderLevelObject
-                        allOrders.add(jsonToOrder(orderData))
+
+                        if (orderFile.nameWithoutExtension.contains('#')){
+                            val explicitID = orderFile.nameWithoutExtension.substringAfter("#").toInt()
+                            allOrders.add(jsonToOrderWithOrderID(orderData, explicitID))
+                        }else {
+                            allOrders.add(jsonToOrder(orderData))
+                        }
                     }
                 }
             } catch (e: Exception) {
@@ -58,6 +64,31 @@ object jsonOrderParser : OrderParserInterface {
 
         return Order(orderedItems, enumStatus, orderDate, enumType)
     }
+
+    fun jsonToOrderWithOrderID(orderData: JSONObject, explicitID: Int): Order {
+        val typeString = orderData["type"] as? String
+        val orderDate = (orderData["order_date"] as? Long) ?: Instant.now().toEpochMilli()
+        val itemsArray = orderData["items"] as? JSONArray ?: JSONArray()
+        val orderedItems = mutableListOf<FoodItem>()
+
+        for (item in itemsArray) {
+            val itemData = item as JSONObject
+            val name = itemData["name"] as? String
+            val quantity = (itemData["quantity"] as? Long)?.toInt()
+            val price = itemData["price"] as? Double
+
+            if (name != null && quantity != null && price != null) {
+                orderedItems.add(FoodItem(name, quantity, price))
+            }
+        }
+
+        val orderStatusString = orderData["order_status"] as? String
+        val enumStatus = parseOrderStatus(orderStatusString)
+        val enumType = parserOrderType(typeString)
+
+        return Order(orderedItems, enumStatus, orderDate, enumType, explicitID)
+    }
+
 
     private fun parseOrderStatus(status: String?): OrderStatus {
         return try {

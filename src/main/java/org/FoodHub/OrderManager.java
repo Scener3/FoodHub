@@ -133,8 +133,7 @@ public class OrderManager{
                 selectedItems,
                 OrderStatus.INCOMING,
                 Instant.now().toEpochMilli(),
-                OrderType.PICKUP,
-                -1
+                OrderType.PICKUP
         );
 
         System.out.println("Created Order File");

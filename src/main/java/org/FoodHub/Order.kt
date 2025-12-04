@@ -30,7 +30,7 @@ data class Order @JvmOverloads constructor(
     /**
      * @return the orderID of an Order.
      */
-    val orderID: Int = getNextInt()
+    var orderID: Int = getNextInt()
 ) {
 
     /**
@@ -51,8 +51,6 @@ data class Order @JvmOverloads constructor(
     init {
         // This prints every time an Order is born
         println("DEBUG: Created Order ID $orderID. StackTrace:")
-        // This prints "Who called me?"
-        java.lang.Exception().printStackTrace()
         println("--------------------------------------------------")
     }
 
