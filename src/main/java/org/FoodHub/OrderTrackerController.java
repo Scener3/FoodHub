@@ -241,9 +241,6 @@ public class OrderTrackerController {
         view.showCreateOrderPopup(menuOption, (selectedItems) ->  {
             Order newOrder = orderManager.createNewOrder(selectedItems);
             process.writeToJSON(newOrder);
-            orderTable.refresh();
-            updatePriceDisplay();
-            saveData.save(orderManager, filePath);
         });
     }
 }

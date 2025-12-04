@@ -133,11 +133,11 @@ public class OrderManager{
                 selectedItems,
                 OrderStatus.INCOMING,
                 Instant.now().toEpochMilli(),
-                OrderType.PICKUP
+                OrderType.PICKUP,
+                -1
         );
 
-        addOrder(newOrder);
-        System.out.println("Order Added");
+        System.out.println("Created Order File");
         return newOrder;
     }
 

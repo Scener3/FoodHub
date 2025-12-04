@@ -42,6 +42,7 @@ public class OrderProcessor {
     }
 
     public List<Order> processSingleOrder(String fileName) throws IOException,ParseException,ParserConfigurationException,SAXException{
+        System.out.println("Test Single Order");
         File orderFile;
         String fileExtension;
         if (!fileName.equals("SavedDataForLoad.json")) {

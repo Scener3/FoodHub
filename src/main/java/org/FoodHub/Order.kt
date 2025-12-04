@@ -46,15 +46,15 @@ data class Order @JvmOverloads constructor(
      * @param orderStatus - the status of an Order.
      * @param orderTime - the time of an Order.
      * @param orderType - the type of Order.
-     *//*
+     */
+
     init {
-        this.orderID = orderIDCounter++
-        if ((this.orderType == OrderType.TOGO) || (this.orderType == OrderType.PICKUP)) {
-            this.deliveryStatus = null
-        } else if (this.orderType == OrderType.DELIVERY) {
-            this.deliveryStatus = DeliveryStatus.PENDING
-        }
-    }*/
+        // This prints every time an Order is born
+        println("DEBUG: Created Order ID $orderID. StackTrace:")
+        // This prints "Who called me?"
+        java.lang.Exception().printStackTrace()
+        println("--------------------------------------------------")
+    }
 
 
     /**
@@ -110,15 +110,6 @@ data class Order @JvmOverloads constructor(
 
 
     companion object {
-        /**
-         * The attributes of an Order.
-         * orderIDCounter - static variable used to give orders their IDs
-         * orderID - the order's ID.
-         * foodItems - the list of FoodItems contained within an order.
-         * orderTime - the time at which an order was received.
-         * orderType - the type of order: pick-up or to-go.
-         * serialVersionUID - Serialized version for compatibility
-         */
         private var orderIDCounter = 0
         fun getNextInt(): Int {
             return orderIDCounter++

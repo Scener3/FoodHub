@@ -103,9 +103,14 @@ public class OrderTrackerView {
         });
 
         submitButton.setOnAction(e -> {
-            if (!cartList.isEmpty()) {
-                onOrderComplete.accept(new ArrayList<>(cartList));
-                stage.close();
+            try {
+                submitButton.setDisable(true);
+                if (!cartList.isEmpty()) {
+                    onOrderComplete.accept(new ArrayList<>(cartList));
+                    stage.close();
+                }
+            } catch(Exception ex){
+                submitButton.setDisable(false);
             }
         });
 

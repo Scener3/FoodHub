@@ -77,7 +77,7 @@ object jsonOrderParser : OrderParserInterface {
 
     fun writeOrderToJSON(theOrder: Order) {
         val targetFolder = if (theOrder.orderStatus == OrderStatus.INCOMING) {
-            File("orders/processed")
+            File("orders")
         } else {
             File("orders/completedOrders")
         }
