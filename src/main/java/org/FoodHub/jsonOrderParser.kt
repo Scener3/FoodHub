@@ -62,7 +62,23 @@ object jsonOrderParser : OrderParserInterface {
         val enumStatus = parseOrderStatus(orderStatusString)
         val enumType = parserOrderType(typeString)
 
-        return Order(orderedItems, enumStatus, orderDate, enumType)
+        // Create delivery status here if it exists
+        val deliveryStatusString = orderData["delivery_status"] as? String
+        var enumDeliveryStatus = if (deliveryStatusString != null){
+            try{
+                DeliveryStatus.valueOf(deliveryStatusString)
+            } catch(e: Exception){null}
+        } else{null}
+
+        if (enumDeliveryStatus == null && enumType == OrderType.DELIVERY){
+            enumDeliveryStatus = DeliveryStatus.PENDING
+        }
+
+        val newOrder = Order(orderedItems, enumStatus, orderDate, enumType)
+        newOrder.deliveryStatus = enumDeliveryStatus
+
+//        return Order(orderedItems, enumStatus, orderDate, enumType)
+        return newOrder
     }
 
     fun jsonToOrderWithOrderID(orderData: JSONObject, explicitID: Int): Order {
@@ -86,7 +102,23 @@ object jsonOrderParser : OrderParserInterface {
         val enumStatus = parseOrderStatus(orderStatusString)
         val enumType = parserOrderType(typeString)
 
-        return Order(orderedItems, enumStatus, orderDate, enumType, explicitID)
+        // Create delivery status here if it exists
+        val deliveryStatusString = orderData["delivery_status"] as? String
+        var enumDeliveryStatus = if (deliveryStatusString != null){
+            try{
+                DeliveryStatus.valueOf(deliveryStatusString)
+            } catch(e: Exception){null}
+        } else{null}
+
+        if (enumDeliveryStatus == null && enumType == OrderType.DELIVERY){
+            enumDeliveryStatus = DeliveryStatus.PENDING
+        }
+
+        val newOrder = Order(orderedItems, enumStatus, orderDate, enumType, explicitID)
+        newOrder.deliveryStatus = enumDeliveryStatus
+
+//        return Order(orderedItems, enumStatus, orderDate, enumType)
+        return newOrder
     }
 
 
@@ -151,18 +183,22 @@ object jsonOrderParser : OrderParserInterface {
     fun formatForWriting(incomingOrder: Order): JSONObject {
         val itemArray = JSONArray()
         for (itemData in incomingOrder.foodItems) {
-            val itemObj = JSONObject()
+            val itemObj = LinkedHashMap<String, Any>()
             itemObj["name"] = itemData.name
             itemObj["quantity"] = itemData.quantity
             itemObj["price"] = itemData.price
             itemArray.add(itemObj)
         }
 
-        val orderObj = JSONObject()
+        val orderObj = LinkedHashMap<String, Any>()
         orderObj["order_status"] = incomingOrder.orderStatus.name
         orderObj["type"] = incomingOrder.orderType.name
+        if (incomingOrder.deliveryStatus != null){
+            orderObj["delivery_status"] = incomingOrder.deliveryStatus!!.name
+        }
         orderObj["order_date"] = incomingOrder.orderTime
         orderObj["items"] = itemArray
+
 
         val finalObj = JSONObject()
         finalObj["order"] = orderObj
