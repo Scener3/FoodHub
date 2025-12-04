@@ -91,12 +91,6 @@ data class Order @JvmOverloads constructor(
         println()
     }*/
 
-    val orderTimeToText: String?
-        get() {
-            val formatDate = DateFormatter(this.orderTime)
-            return formatDate.getDate()
-        }
-
     val orderTypeIcon: OrderTypeIcon
         /**
          *
