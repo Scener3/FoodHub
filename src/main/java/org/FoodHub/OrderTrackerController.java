@@ -176,6 +176,7 @@ public class OrderTrackerController {
         Order selected = orderTable.getSelectionModel().getSelectedItem();
         OrderStatus newStatus = statusBox.getValue();
         if (newStatus == OrderStatus.COMPLETED){
+            selected.setOrderStatus(OrderStatus.COMPLETED);
             process.writeToJSON(selected);
         }
         if (selected != null && newStatus != null) {
