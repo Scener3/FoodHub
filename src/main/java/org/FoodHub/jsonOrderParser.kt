@@ -28,7 +28,7 @@ object jsonOrderParser : OrderParserInterface {
 
                         if (orderFile.nameWithoutExtension.contains('#')){
                             val explicitID = orderFile.nameWithoutExtension.substringAfter("#").toInt()
-                            allOrders.add(jsonToOrderWithOrderID(orderData, explicitID))
+                            allOrders.add(jsonToOrder(orderData, explicitID))
                         }else {
                             allOrders.add(jsonToOrder(orderData))
                         }
@@ -41,7 +41,7 @@ object jsonOrderParser : OrderParserInterface {
         return allOrders
     }
 
-    fun jsonToOrder(orderData: JSONObject): Order {
+    fun jsonToOrder(orderData: JSONObject, explicitID: Int? = null): Order {
         val typeString = orderData["type"] as? String
         val orderDate = (orderData["order_date"] as? Long) ?: Instant.now().toEpochMilli()
         val itemsArray = orderData["items"] as? JSONArray ?: JSONArray()
@@ -74,50 +74,15 @@ object jsonOrderParser : OrderParserInterface {
             enumDeliveryStatus = DeliveryStatus.PENDING
         }
 
-        val newOrder = Order(orderedItems, enumStatus, orderDate, enumType)
-        newOrder.deliveryStatus = enumDeliveryStatus
-
-//        return Order(orderedItems, enumStatus, orderDate, enumType)
-        return newOrder
-    }
-
-    fun jsonToOrderWithOrderID(orderData: JSONObject, explicitID: Int): Order {
-        val typeString = orderData["type"] as? String
-        val orderDate = (orderData["order_date"] as? Long) ?: Instant.now().toEpochMilli()
-        val itemsArray = orderData["items"] as? JSONArray ?: JSONArray()
-        val orderedItems = mutableListOf<FoodItem>()
-
-        for (item in itemsArray) {
-            val itemData = item as JSONObject
-            val name = itemData["name"] as? String
-            val quantity = (itemData["quantity"] as? Long)?.toInt()
-            val price = itemData["price"] as? Double
-
-            if (name != null && quantity != null && price != null) {
-                orderedItems.add(FoodItem(name, quantity, price))
-            }
+        val newOrder = if (explicitID != null) {
+            Order(orderedItems, enumStatus, orderDate, enumType, explicitID)
+        } else{
+            Order(orderedItems, enumStatus, orderDate, enumType)
         }
 
-        val orderStatusString = orderData["order_status"] as? String
-        val enumStatus = parseOrderStatus(orderStatusString)
-        val enumType = parserOrderType(typeString)
-
-        // Create delivery status here if it exists
-        val deliveryStatusString = orderData["delivery_status"] as? String
-        var enumDeliveryStatus = if (deliveryStatusString != null){
-            try{
-                DeliveryStatus.valueOf(deliveryStatusString)
-            } catch(e: Exception){null}
-        } else{null}
-
-        if (enumDeliveryStatus == null && enumType == OrderType.DELIVERY){
-            enumDeliveryStatus = DeliveryStatus.PENDING
-        }
-
-        val newOrder = Order(orderedItems, enumStatus, orderDate, enumType, explicitID)
         newOrder.deliveryStatus = enumDeliveryStatus
 
-//        return Order(orderedItems, enumStatus, orderDate, enumType)
+
         return newOrder
     }
 
