@@ -8,7 +8,6 @@ import java.time.Instant
 import java.util.*
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.parsers.ParserConfigurationException
-import kotlin.concurrent.Volatile
 
 object xmlParser : OrderParserInterface {
     @Throws(IOException::class, ParserConfigurationException::class, SAXException::class)

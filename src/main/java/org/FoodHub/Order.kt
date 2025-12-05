@@ -68,27 +68,6 @@ data class Order @JvmOverloads constructor(
         return totalPrice
     }
 
-    /*    *//**
-     * Displays the details of an order.
-     *//*
-    fun displayOrder() {
-        val readableDate = DateFormatter(this.orderTime)
-        val finalDateOutput = readableDate.getDate()
-        val header = """
-        Order ID: %d
-        Order Type: %s
-        Date: %s
-        Price Total: ${'$'}%.2f
-            Items       Quantity    Price
-
-                """.trimIndent()
-        System.out.printf(header, this.orderID, this.orderType, finalDateOutput, this.calculateTotalPrice())
-        for (i in this.foodItems) {
-            System.out.printf("    %-10s    %-10d$%-10.2f\n", i.name, i.getQuantity(), i.price)
-        }
-        println()
-    }*/
-
     val orderTypeIcon: OrderTypeIcon
         /**
          *

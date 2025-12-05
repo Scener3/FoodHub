@@ -10,13 +10,4 @@ class Menu (){
         FoodItem("Onion Rings", 1, 3.99)
     )
 
-    fun selectItem(index: Int, quantitySelected: Int): FoodItem?{
-        if (index in availableFoodItem.indices){
-            val item = availableFoodItem[index]
-            val itemToAdd = item.copy(quantity = quantitySelected)
-        }
-        return null
-    }
-
-
 }

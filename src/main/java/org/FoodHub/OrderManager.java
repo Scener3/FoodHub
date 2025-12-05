@@ -38,48 +38,6 @@ public class OrderManager{
             System.out.printf("Order with ID %d doesn't exist.\n", orderID);
         }
     }
-/*
-
-///////////////////// Commented out unused codes maybe will need it for restructuring later
-    */
-/**
- * Changes an incoming order's status to Started.
- *
- * @param orderID - the orderID of the order to be started.
- *//*
-
-    void startIncomingOrder(int orderID) {
-        Order order = findOrder(orderID);
-
-        if (order != null) {
-            if(!order.getOrderStatus().equals(OrderStatus.INCOMING)) {
-                System.out.println("Only incoming orders can be started.\n");
-            } else {
-                order.setOrderStatus(OrderStatus.STARTED);
-            }
-        } else {
-            System.out.printf("Order with ID %d doesn't exist.\n", orderID);
-        }
-    }
-
-    */
-/**
- * Sets a given order's status to COMPLETE.
- *
- * @param orderID - the orderID of the order to be completed.
- *//*
-
-    void completeIncomingOrder(int orderID) {
-        Order order = findOrder(orderID);
-        if(findOrder(orderID) != null && order.getOrderStatus().equals(OrderStatus.STARTED)) {
-            order.setOrderStatus(OrderStatus.COMPLETED);
-        } else if(order == null) {
-            System.out.printf("Order with ID %d doesn't exist.\n", orderID);
-        } else {
-            System.out.printf("Order with ID %d must be started first.\n", orderID);
-        }
-    }
-*/
 
 
     /**
