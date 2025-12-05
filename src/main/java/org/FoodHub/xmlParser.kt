@@ -10,10 +10,10 @@ import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.parsers.ParserConfigurationException
 import kotlin.concurrent.Volatile
 
-class xmlParser private constructor() : OrderParserInterface {
+object xmlParser : OrderParserInterface {
     @Throws(IOException::class, ParserConfigurationException::class, SAXException::class)
-    override fun loadToOrder(orderFile: File?): MutableList<Order?> {
-        val allOrder: MutableList<Order?> = ArrayList<Order?>()
+    override fun loadToOrder(orderFile: File): MutableList<Order> {
+        val allOrder: MutableList<Order> = ArrayList<Order>()
         val factory = DocumentBuilderFactory.newInstance()
         val builder = factory.newDocumentBuilder()
         val document = builder.parse(orderFile)
@@ -21,7 +21,7 @@ class xmlParser private constructor() : OrderParserInterface {
         val orderList = document.getElementsByTagName("Order")
 
         for (i in 0..<orderList.getLength()) {
-            val allFood: MutableList<FoodItem?> = ArrayList<FoodItem?>()
+            val allFood: MutableList<FoodItem> = ArrayList<FoodItem>()
             val order = orderList.item(i) as Element
             //            String orderID = order.getAttribute("id");
             val orderType = order.getElementsByTagName("OrderType").item(0).getTextContent()
@@ -66,24 +66,4 @@ class xmlParser private constructor() : OrderParserInterface {
         }
     }
 
-
-    companion object {
-        /*
-     * Singleton Pattern for the xmlParser
-     *
-     * */
-        @Volatile
-        var instance: xmlParser? = null
-            get() {
-                if (field == null) {
-                    synchronized(xmlParser::class.java) {
-                        if (field == null) {
-                            field = xmlParser()
-                        }
-                    }
-                }
-                return field
-            }
-            private set
-    }
 }

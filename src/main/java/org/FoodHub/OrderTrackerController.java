@@ -1,29 +1,20 @@
 package org.FoodHub;
 
-import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.geometry.Pos;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.VBox;
-import javafx.scene.text.Text;
-import javafx.stage.Stage;
 import org.json.simple.parser.ParseException;
 import org.xml.sax.SAXException;
-import javafx.scene.image.Image;
 import javax.xml.parsers.ParserConfigurationException;
 import java.awt.*;
 import javafx.scene.control.Label;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -167,6 +158,21 @@ public class OrderTrackerController {
             deliveryStatusBox.setValue(null);
         }
 
+        statusBox.setDisable(false);
+        // Disables StatusBox if the order is completed
+        if (selected != null && selected.getOrderStatus() == OrderStatus.COMPLETED || selected.getOrderStatus() == OrderStatus.CANCELLED){
+            statusBox.setDisable(true);
+        }
+        else if (selected != null && selected.getOrderStatus() == OrderStatus.STARTED){
+            statusBox.setItems(FXCollections.observableArrayList(
+                    OrderStatus.CANCELLED,
+                    OrderStatus.COMPLETED
+            ));
+        }
+        else{
+            statusBox.setItems(FXCollections.observableArrayList(OrderStatus.values()));
+        }
+
         if (selected != null) {
             statusBox.setValue(selected.getOrderStatus());
         }
@@ -186,9 +192,11 @@ public class OrderTrackerController {
         if (selected != null && !deliveryStatusBox.isDisable() && deliveryStatusBox.getValue() != null) {
             orderManager.findOrder(selected.getOrderID()).setDeliveryStatus(deliveryStatusBox.getValue());
         }
+
         orderTable.refresh();
         saveData.save(orderManager, filePath);
         updatePriceDisplay();
+        updateUIForSelectedOrder(selected);
     }
 
     public void handleDisplayOrder(ActionEvent actionEvent) {

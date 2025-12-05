@@ -10,7 +10,7 @@ public class AbstractedOrderParserFactory {
 
     static{
         registerParser("JSON", jsonOrderParser.INSTANCE);
-        registerParser("XML", xmlParser.getInstance());
+        registerParser("XML", xmlParser.INSTANCE);
     }
 
     public static void registerParser(String format, OrderParserInterface parserInstance){
