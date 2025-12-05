@@ -12,12 +12,7 @@ data class Order @JvmOverloads constructor(
      * @return the list of FoodItems in an Order.
      */
     val foodItems: MutableList<FoodItem> = mutableListOf(),
-    /**
-     * Sets an Order's status.
-     *
-     * @param orderStatus - the Order's new status.
-     */
-    var orderStatus: OrderStatus,
+    private var _status: OrderStatus,
     /**
      * @return the time of an Order.
      */
@@ -31,6 +26,7 @@ data class Order @JvmOverloads constructor(
      * @return the orderID of an Order.
      */
     var orderID: Int = getNextInt()
+
 ) {
 
     /**
@@ -78,6 +74,41 @@ data class Order @JvmOverloads constructor(
             OrderType.PICKUP -> OrderTypeIcon.Pick_Up_Icon
             OrderType.TOGO -> OrderTypeIcon.To_Go_Icon
         }
+
+
+    private fun mapEnumToState(status : OrderStatus) : OrderState{
+        return when(status){
+            OrderStatus.INCOMING -> IncomingState()
+            OrderStatus.STARTED -> StartedState()
+            OrderStatus.COMPLETED -> CompletedState()
+            OrderStatus.CANCELLED -> CancelledState()
+        }
+    }
+
+    @Transient
+    var state: OrderState = mapEnumToState(_status)
+        private set
+
+    val orderStatus: OrderStatus
+        get() = state.getStatusEnum()
+
+    fun changeState(newState : OrderState){
+        this.state = newState
+        this._status = newState.getStatusEnum()
+    }
+
+    fun proceedToNextStep(){
+        state.next(this)
+    }
+
+    fun cancelOrder(){
+        state.cancel(this)
+    }
+
+    fun updateStatus(newStatus : OrderStatus){
+        val newStateObject = mapEnumToState(newStatus)
+        changeState(newStateObject)
+    }
 
 
     companion object {

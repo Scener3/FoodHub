@@ -181,16 +181,12 @@ public class OrderTrackerController {
     public void handleUpdateStatus(ActionEvent actionEvent) throws IOException, ParseException, ParserConfigurationException, SAXException {
         Order selected = orderTable.getSelectionModel().getSelectedItem();
         OrderStatus newStatus = statusBox.getValue();
-        if (newStatus == OrderStatus.COMPLETED){
-            selected.setOrderStatus(OrderStatus.COMPLETED);
-            process.writeToJSON(selected);
-        }
-        if (selected != null && newStatus != null) {
-            orderManager.findOrder(selected.getOrderID()).setOrderStatus(newStatus);
-            orderTable.refresh();
-        }
-        if (selected != null && !deliveryStatusBox.isDisable() && deliveryStatusBox.getValue() != null) {
-            orderManager.findOrder(selected.getOrderID()).setDeliveryStatus(deliveryStatusBox.getValue());
+        DeliveryStatus newDeliveryStatus = deliveryStatusBox.getValue();
+        if (selected == null || newStatus == null) return;
+        selected.updateStatus(newStatus);
+
+        if(!deliveryStatusBox.isDisable() && newDeliveryStatus != null){
+            selected.setDeliveryStatus(newDeliveryStatus);
         }
 
         orderTable.refresh();

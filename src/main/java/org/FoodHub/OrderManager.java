@@ -33,7 +33,7 @@ public class OrderManager{
     void cancelOrder(int orderID) {
         Order order = findOrder(orderID);
         if (order != null) {
-            order.setOrderStatus(OrderStatus.CANCELLED);
+            order.cancelOrder();
         } else {
             System.out.printf("Order with ID %d doesn't exist.\n", orderID);
         }
