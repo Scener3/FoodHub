@@ -105,9 +105,19 @@ data class Order @JvmOverloads constructor(
         state.cancel(this)
     }
 
-    fun updateStatus(newStatus : OrderStatus){
+    fun updateStatus(newStatus: OrderStatus) {
         val newStateObject = mapEnumToState(newStatus)
         changeState(newStateObject)
+    }
+
+    fun updateOrderType(newType: OrderType) {
+        this.orderType = newType
+        this.deliveryStatus =
+            if (newType == OrderType.DELIVERY) DeliveryStatus.PENDING else null
+    }
+
+    fun updateDeliveryStatus(newStatus: DeliveryStatus?) {
+        this.deliveryStatus = newStatus
     }
 
 
