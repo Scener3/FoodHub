@@ -24,15 +24,8 @@ import javafx.scene.control.MenuItem;
 
 
 public class OrderTrackerController {
-   private OrderProcessor process = new OrderProcessor();
-   private OrderManager orderManager = new OrderManager();
+   private final OrderFacade orderFacade = new OrderFacade();
    private ObservableList<Order> allOrdersList;
-   private SaveState saveData = new jsonSaveData(orderManager);
-   private File filePath = new File("SavedDataForLoad.json");
-   private FileAccesser accesser = new FileAccesser();
-   private List<Order> allOrders;
-   private FetchFilesService fileListenerService;
-   private Thread fileListenerThread;
    private OrderTrackerView view = new OrderTrackerView();
 
 
@@ -67,7 +60,6 @@ public class OrderTrackerController {
 
 
 
-
    /**
     * Will initialize with SavedDataForLoad.json being processed
     * **/
@@ -80,23 +72,17 @@ public class OrderTrackerController {
        setupDeliveryStatusContextMenu();
        setupDropDowns();
        setupListener();
-       loadInitData();
 
+       allOrdersList = FXCollections.observableArrayList();
+       orderTable.setItems(allOrdersList);
 
-       fileListenerService = new FetchFilesService(allOrdersList, orderManager, process, accesser, () -> {
-           updatePriceDisplay();
-           saveData.save(orderManager, filePath);
-       });
-       fileListenerThread = new Thread(fileListenerService, "FileWatcherThread");
-       fileListenerThread.setDaemon(true);
-       fileListenerThread.start();
-   }
+       orderFacade.init(allOrdersList, this::updatePriceDisplay);
+    }
+
 
 
    public void shutdown(){
-       if (fileListenerService != null){
-           fileListenerService.stop();
-       }
+       orderFacade.shutdown();
    }
 
 
@@ -138,16 +124,7 @@ public class OrderTrackerController {
 
             for (OrderType orderType : OrderType.values()) {
                 MenuItem item = new MenuItem(orderType.toString());
-                item.setOnAction(e -> {
-                    order.updateOrderType(orderType);
-                    if (orderType != OrderType.DELIVERY) {
-                        order.updateDeliveryStatus(null);
-                    }
-                    orderTable.refresh();
-                    saveData.save(orderManager, filePath);
-                    updatePriceDisplay();
-                    updateUIForSelectedOrder(order);
-                });
+                item.setOnAction(e -> changeOrderType(order, orderType));
                 menu.getItems().add(item);
             }
 
@@ -188,7 +165,7 @@ private void setupStatusContextMenu() {
                 item.setOnAction(e -> {
                     order.updateStatus(status);
                     orderTable.refresh();
-                    saveData.save(orderManager, filePath);
+                    orderFacade.save();
                     updatePriceDisplay();
                     updateUIForSelectedOrder(order);
                 });
@@ -227,7 +204,7 @@ private void setupDeliveryStatusContextMenu() {
                 item.setOnAction(e -> {
                     order.updateDeliveryStatus(ds);
                     orderTable.refresh();
-                    saveData.save(orderManager, filePath);
+                    orderFacade.save();
                     updatePriceDisplay();
                     updateUIForSelectedOrder(order);
                 });
@@ -269,7 +246,16 @@ private void disableContextMenuOnIdAndDate() {
     });
 }
 
-
+private void changeOrderType(Order selectedOrder, OrderType newType) {
+    selectedOrder.updateOrderType(newType);
+    if (newType != OrderType.DELIVERY) {
+        selectedOrder.updateDeliveryStatus(null);
+    }
+    orderTable.refresh();
+    orderFacade.save();
+    updatePriceDisplay();
+    updateUIForSelectedOrder(selectedOrder);
+}
 
    private void setupDropDowns(){
        // Setting Status Box
@@ -288,28 +274,11 @@ private void disableContextMenuOnIdAndDate() {
        });
    }
 
-   private void loadInitData() throws IOException, ParseException, ParserConfigurationException, SAXException {
-       if (filePath.exists() && filePath.length() > 0) {
-           allOrders = process.processSingleOrder("SavedDataForLoad.json");
-           allOrders.addAll(process.processAllOrder());
-       }
-       else
-       {
-           allOrders = process.processAllOrder();
-       }
 
-       orderManager.setAllOrder(allOrders);
-       allOrdersList = FXCollections.observableArrayList(allOrders);
-       orderTable.setItems(allOrdersList);
-
-
-       updatePriceDisplay();
-       saveData.save(orderManager, filePath);
-   }
 
 
    public void handleExportOrders(ActionEvent actionEvent) {
-       process.writeAllOrdersToFile(orderManager.getOrders());
+       orderFacade.exportAllOrders();
    }
 
 
@@ -349,22 +318,24 @@ private void disableContextMenuOnIdAndDate() {
    }
 
 
-   public void handleUpdateStatus(ActionEvent actionEvent) throws IOException, ParseException, ParserConfigurationException, SAXException {
-       Order selected = orderTable.getSelectionModel().getSelectedItem();
-       OrderStatus newStatus = statusBox.getValue();
-       DeliveryStatus newDeliveryStatus = deliveryStatusBox.getValue();
+   public void handleUpdateStatus(ActionEvent actionEvent)
+        throws IOException, ParseException, ParserConfigurationException, SAXException {
+       Order selected = (Order) orderTable.getSelectionModel().getSelectedItem();
+       OrderStatus newStatus = (OrderStatus) statusBox.getValue();
+       DeliveryStatus newDeliveryStatus = (DeliveryStatus) deliveryStatusBox.getValue();
        if (selected == null || newStatus == null) return;
+
        selected.updateStatus(newStatus);
 
-       if(!deliveryStatusBox.isDisable() && newDeliveryStatus != null){
+       if (!deliveryStatusBox.isDisable() && newDeliveryStatus != null) {
            selected.setDeliveryStatus(newDeliveryStatus);
        }
 
        orderTable.refresh();
-       saveData.save(orderManager, filePath);
+       orderFacade.save();
        updatePriceDisplay();
        updateUIForSelectedOrder(selected);
-   }
+}
 
 
    public void handleDisplayOrder(ActionEvent actionEvent) {
@@ -377,18 +348,21 @@ private void disableContextMenuOnIdAndDate() {
 
 
    private void updatePriceDisplay(){
-       double total = orderManager.getAllOrderPrice();
-       view.updatePriceDisplay(totalPriceLabel, total);
+       double total = orderFacade.getTotalPrice();
+        view.updatePriceDisplay(totalPriceLabel, total);
    }
 
 
    public void handleCreateOrder(ActionEvent actionEvent){
-       OrderManager tempOrderManager = new OrderManager();
-       List<FoodItem> menuOption = orderManager.getMenuList();
-       view.showCreateOrderPopup(menuOption, (selectedItems) ->  {
-           Order newOrder = tempOrderManager.createNewOrder(selectedItems);
-           newOrder.setOrderID(orderManager.getOrders().size());
-           process.writeToJSON(newOrder);
-       });
-   }
+    OrderManager tempOrderManager = new OrderManager();
+    List<FoodItem> menuOption = orderFacade.getMenuList();
+    view.showCreateOrderPopup(menuOption, (selectedItems) -> {
+        Order newOrder = tempOrderManager.createNewOrder(selectedItems);
+        newOrder.setOrderID(orderFacade.getOrderManager().getOrders().size());
+        orderFacade.addOrderFromUi(newOrder);
+        // optional: keep JSON export
+        new OrderProcessor().writeToJSON(newOrder);
+    });
+}
+
 }
