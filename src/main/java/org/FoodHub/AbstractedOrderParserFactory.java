@@ -9,8 +9,8 @@ public class AbstractedOrderParserFactory {
     private static final Map<String, OrderParserInterface> registeredParser = new ConcurrentHashMap<>();
 
     static{
-        registerParser("JSON", jsonOrderParser.INSTANCE);
-        registerParser("XML", xmlParser.INSTANCE);
+        registerParser("JSON", JSONOrderParser.INSTANCE);
+        registerParser("XML", XMLParser.INSTANCE);
     }
 
     public static void registerParser(String format, OrderParserInterface parserInstance){

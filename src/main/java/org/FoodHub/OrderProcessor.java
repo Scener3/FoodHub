@@ -60,12 +60,12 @@ public class OrderProcessor {
     }
 
     public void writeToJSON(Order theOrder){
-        jsonOrderParser parser = jsonOrderParser.INSTANCE;
+        JSONOrderParser parser = JSONOrderParser.INSTANCE;
         parser.writeOrderToJSON(theOrder);
     }
 
     public void writeAllOrdersToFile(List<Order> allOrders){
-        jsonOrderParser parser = jsonOrderParser.INSTANCE;
+        JSONOrderParser parser = JSONOrderParser.INSTANCE;
         parser.writeAllOrderToFile(allOrders);
     }
 

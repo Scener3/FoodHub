@@ -307,6 +307,11 @@ private void changeOrderType(Order selectedOrder, OrderType newType) {
                    OrderStatus.CANCELLED,
                    OrderStatus.COMPLETED
            ));
+       } else if (selected != null && selected.getOrderStatus() == OrderStatus.INCOMING) {
+           statusBox.setItems(FXCollections.observableArrayList(
+                   OrderStatus.STARTED,
+                   OrderStatus.CANCELLED
+           ));
        }
        else{
            statusBox.setItems(FXCollections.observableArrayList(OrderStatus.values()));

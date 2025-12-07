@@ -8,7 +8,7 @@ import java.io.FileWriter
 import java.io.FileReader
 import java.time.Instant
 
-object jsonOrderParser : OrderParserInterface {
+object JSONOrderParser : OrderParserInterface {
     override fun loadToOrder(orderFile: File): MutableList<Order> {
         val allOrders = ArrayList<Order>()
         val parser = JSONParser()

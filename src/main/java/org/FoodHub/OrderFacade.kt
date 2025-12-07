@@ -10,22 +10,18 @@ import javax.xml.parsers.ParserConfigurationException
 
 class OrderFacade {
     @JvmField
-    val orderManager: OrderManager
-    private val processor: OrderProcessor
+    val orderManager: OrderManager = OrderManager()
+    private val processor: OrderProcessor = OrderProcessor()
     private val saveData: SaveState
-    private val accesser: FileAccesser
-    private val filePath: File
+    private val accesser: FileAccesser = FileAccesser()
+    private val filePath: File = File("SavedDataForLoad.json")
 
     private var allOrdersList: ObservableList<Order?>? = null
     private var fileListenerService: FetchFilesService? = null
     private var fileListenerThread: Thread? = null
 
     init {
-        this.orderManager = OrderManager()
-        this.processor = OrderProcessor()
-        this.accesser = FileAccesser()
-        this.filePath = File("SavedDataForLoad.json")
-        this.saveData = jsonSaveData(orderManager)
+        this.saveData = JSONSaveData(orderManager)
     }
 
     @Throws(IOException::class, ParseException::class, ParserConfigurationException::class, SAXException::class)

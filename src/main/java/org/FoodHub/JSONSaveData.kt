@@ -9,8 +9,8 @@ import java.io.FileWriter
 import java.io.IOException
 import javax.xml.parsers.ParserConfigurationException
 
-class jsonSaveData(private val orderManager: OrderManager) : SaveState {
-    private val orderParser = jsonOrderParser
+class JSONSaveData(private val orderManager: OrderManager) : SaveState {
+    private val orderParser = JSONOrderParser
 
     override fun save(om: OrderManager, filePath: File) {
         val ordersArray = JSONArray()

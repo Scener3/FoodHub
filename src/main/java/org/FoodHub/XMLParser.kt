@@ -9,7 +9,7 @@ import java.util.*
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.parsers.ParserConfigurationException
 
-object xmlParser : OrderParserInterface {
+object XMLParser : OrderParserInterface {
     @Throws(IOException::class, ParserConfigurationException::class, SAXException::class)
     override fun loadToOrder(orderFile: File): MutableList<Order> {
         val allOrder: MutableList<Order> = ArrayList<Order>()
