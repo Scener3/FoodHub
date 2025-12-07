@@ -358,7 +358,7 @@ private void changeOrderType(Order selectedOrder, OrderType newType) {
     List<FoodItem> menuOption = orderFacade.getMenuList();
     view.showCreateOrderPopup(menuOption, (selectedItems) -> {
         Order newOrder = tempOrderManager.createNewOrder(selectedItems);
-        newOrder.setOrderID(orderFacade.getOrderManager().getOrders().size());
+        newOrder.setOrderID(orderFacade.orderManager.getOrders().size());
         orderFacade.addOrderFromUi(newOrder);
         // optional: keep JSON export
         new OrderProcessor().writeToJSON(newOrder);

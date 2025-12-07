@@ -1,102 +1,92 @@
-package org.FoodHub;
+package org.FoodHub
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import org.json.simple.parser.ParseException;
-import org.xml.sax.SAXException;
+import javafx.collections.FXCollections
+import javafx.collections.ObservableList
+import org.json.simple.parser.ParseException
+import org.xml.sax.SAXException
+import java.io.File
+import java.io.IOException
+import javax.xml.parsers.ParserConfigurationException
 
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
+class OrderFacade {
+    @JvmField
+    val orderManager: OrderManager
+    private val processor: OrderProcessor
+    private val saveData: SaveState
+    private val accesser: FileAccesser
+    private val filePath: File
 
-public class OrderFacade {
+    private var allOrdersList: ObservableList<Order?>? = null
+    private var fileListenerService: FetchFilesService? = null
+    private var fileListenerThread: Thread? = null
 
-    private final OrderManager orderManager;
-    private final OrderProcessor processor;
-    private final SaveState saveData;
-    private final FileAccesser accesser;
-    private final File filePath;
-
-    private ObservableList<Order> allOrdersList;
-    private FetchFilesService fileListenerService;
-    private Thread fileListenerThread;
-
-    public OrderFacade() {
-        this.orderManager = new OrderManager();
-        this.processor = new OrderProcessor();
-        this.accesser = new FileAccesser();
-        this.filePath = new File("SavedDataForLoad.json");
-        this.saveData = new jsonSaveData(orderManager);
+    init {
+        this.orderManager = OrderManager()
+        this.processor = OrderProcessor()
+        this.accesser = FileAccesser()
+        this.filePath = File("SavedDataForLoad.json")
+        this.saveData = jsonSaveData(orderManager)
     }
 
-    public void init(ObservableList<Order> tableBackingList, Runnable priceUpdateCallback)
-            throws IOException, ParseException, ParserConfigurationException, SAXException {
-
-        List<Order> allOrders;
+    @Throws(IOException::class, ParseException::class, ParserConfigurationException::class, SAXException::class)
+    fun init(tableBackingList: ObservableList<Order?>, priceUpdateCallback: Runnable) {
+        val allOrders: MutableList<Order?>
         if (filePath.exists() && filePath.length() > 0) {
-            allOrders = processor.processSingleOrder("SavedDataForLoad.json");
-            allOrders.addAll(processor.processAllOrder());
+            allOrders = processor.processSingleOrder("SavedDataForLoad.json")
+            allOrders.addAll(processor.processAllOrder())
         } else {
-            allOrders = processor.processAllOrder();
+            allOrders = processor.processAllOrder()
         }
 
-        orderManager.setAllOrder(allOrders);
-        allOrdersList = FXCollections.observableArrayList(allOrders);
-        tableBackingList.setAll(allOrdersList);
+        orderManager.setAllOrder(allOrders)
+        allOrdersList = FXCollections.observableArrayList<Order?>(allOrders)
+        tableBackingList.setAll(allOrdersList)
 
-        priceUpdateCallback.run();
-        saveData.save(orderManager, filePath);
+        priceUpdateCallback.run()
+        saveData.save(orderManager, filePath)
 
-        fileListenerService = new FetchFilesService(
-                allOrdersList,
-                orderManager,
-                processor,
-                accesser,
-                () -> {
-                    priceUpdateCallback.run();
-                    saveData.save(orderManager, filePath);
-                }
-        );
-        fileListenerThread = new Thread(fileListenerService, "FileWatcherThread");
-        fileListenerThread.setDaemon(true);
-        fileListenerThread.start();
+        fileListenerService = FetchFilesService(
+            allOrdersList,
+            orderManager,
+            processor,
+            accesser,
+            Runnable {
+                priceUpdateCallback.run()
+                saveData.save(orderManager, filePath)
+            }
+        )
+        fileListenerThread = Thread(fileListenerService, "FileWatcherThread")
+        fileListenerThread!!.setDaemon(true)
+        fileListenerThread!!.start()
     }
 
-    public void shutdown() {
+    fun shutdown() {
         if (fileListenerService != null) {
-            fileListenerService.stop();
+            fileListenerService!!.stop()
         }
     }
 
-    public ObservableList<Order> getAllOrdersList() {
-        return allOrdersList;
+    fun getAllOrdersList(): ObservableList<Order?> {
+        return allOrdersList!!
     }
 
-    public double getTotalPrice() {
-        return orderManager.getAllOrderPrice();
+    val totalPrice: Double
+        get() = orderManager.getAllOrderPrice()
+
+    fun save() {
+        saveData.save(orderManager, filePath)
     }
 
-    public void save() {
-        saveData.save(orderManager, filePath);
+    fun addOrderFromUi(newOrder: Order?) {
+        orderManager.addOrder(newOrder)
+        allOrdersList!!.add(newOrder)
+        save()
     }
 
-    public void addOrderFromUi(Order newOrder) {
-        orderManager.addOrder(newOrder);
-        allOrdersList.add(newOrder);
-        save();
-    }
+    val menuList: MutableList<FoodItem?>?
+        get() = orderManager.getMenuList()
 
-    public List<FoodItem> getMenuList() {
-        return orderManager.getMenuList();
+    fun exportAllOrders() {
+        processor.writeAllOrdersToFile(orderManager.getOrders())
     }
-
-    public OrderManager getOrderManager() {
-        return orderManager;
-    }
-
-    public void exportAllOrders() {
-        processor.writeAllOrdersToFile(orderManager.getOrders());
-    }
-
 }
