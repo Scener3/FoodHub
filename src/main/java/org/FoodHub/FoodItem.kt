@@ -12,11 +12,15 @@ data class FoodItem
  * @param quantity - quantity of the food.
  * @param price - price per-item of food.
  */(
-    val name: String, val quantity: Int,
+    val name: String, val quantity: Long,
     /**
      * @return the price of a FoodItem.
      */
     val price: Double
 )
+
+
+
+
 
 

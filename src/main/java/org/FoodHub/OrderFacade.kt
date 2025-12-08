@@ -35,8 +35,8 @@ class OrderFacade {
         }
 
         orderManager.setAllOrder(allOrders)
-        allOrdersList = FXCollections.observableArrayList<Order?>(allOrders)
-        tableBackingList.setAll(allOrdersList)
+        allOrdersList = tableBackingList
+        allOrdersList!!.setAll(allOrders)
 
         priceUpdateCallback.run()
         saveData.save(orderManager, filePath)
@@ -74,7 +74,7 @@ class OrderFacade {
     }
 
     fun addOrderFromUi(newOrder: Order?) {
-        orderManager.addOrder(newOrder)
+        orderManager.addOrder(newOrder!!)
         allOrdersList!!.add(newOrder)
         save()
     }

@@ -46,16 +46,17 @@ object JSONOrderParser : OrderParserInterface {
         val orderDate = (orderData["order_date"] as? Long) ?: Instant.now().toEpochMilli()
         val itemsArray = orderData["items"] as? JSONArray ?: JSONArray()
         val orderedItems = mutableListOf<FoodItem>()
-
+        val items = mutableListOf<FoodItem>()
         for (item in itemsArray) {
             val itemData = item as JSONObject
             val name = itemData["name"] as? String
-            val quantity = (itemData["quantity"] as? Long)?.toInt()
+            val quantity = itemData["quantity"] as? Int
             val price = itemData["price"] as? Double
 
             if (name != null && quantity != null && price != null) {
-                orderedItems.add(FoodItem(name, quantity, price))
-            }
+                val item = FoodItem(name, quantity.toLong(), price)
+                items.add(item)
+}
         }
 
         val orderStatusString = orderData["order_status"] as? String

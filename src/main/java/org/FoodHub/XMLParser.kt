@@ -29,11 +29,11 @@ object XMLParser : OrderParserInterface {
             }
 
             val itemList = order.getElementsByTagName("Item")
-            for (j in 0..<itemList.getLength()) {
+            for (j in 0..<itemList.length) {
                 val item = itemList.item(j) as Element
                 val type = item.getAttribute("type")
-                val priceString = item.getElementsByTagName("Price").item(0).getTextContent()
-                val quantityString = item.getElementsByTagName("Quantity").item(0).getTextContent()
+                val priceString = item.getElementsByTagName("Price").item(0).textContent
+                val quantityString = item.getElementsByTagName("Quantity").item(0).textContent
 
                 if (type.isBlank() || priceString.isBlank() || quantityString.isBlank()) {
                     throw SAXException("Missing Data Will Not Accept")
@@ -41,7 +41,7 @@ object XMLParser : OrderParserInterface {
 
                 val price = priceString.toDouble()
                 val quantity = quantityString.toInt()
-                val currentFood = FoodItem(type, quantity, price)
+                val currentFood = FoodItem(type, quantity.toLong(), price)
                 allFood.add(currentFood)
             }
 
@@ -58,7 +58,7 @@ object XMLParser : OrderParserInterface {
 
     private fun xmlParseOrderType(type: String?): OrderType? {
         if (type == null) return null
-        try {
+        return try {
             return OrderType.valueOf(type.trim { it <= ' ' }.uppercase(Locale.getDefault()))
         } catch (e: IllegalArgumentException) {
             return null

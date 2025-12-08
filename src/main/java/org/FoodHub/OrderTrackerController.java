@@ -21,6 +21,8 @@ import java.util.Date;
 import java.util.List;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.application.Platform;
+
 
 
 public class OrderTrackerController {
@@ -359,15 +361,20 @@ private void changeOrderType(Order selectedOrder, OrderType newType) {
 
 
    public void handleCreateOrder(ActionEvent actionEvent){
-    OrderManager tempOrderManager = new OrderManager();
     List<FoodItem> menuOption = orderFacade.getMenuList();
     view.showCreateOrderPopup(menuOption, (selectedItems) -> {
-        Order newOrder = tempOrderManager.createNewOrder(selectedItems);
+        Order newOrder = orderFacade.orderManager.createNewOrder(selectedItems);
         newOrder.setOrderID(orderFacade.orderManager.getOrders().size());
         orderFacade.addOrderFromUi(newOrder);
-        // optional: keep JSON export
-        new OrderProcessor().writeToJSON(newOrder);
+
+        Platform.runLater(() -> {
+            System.out.println("DEBUG: Adding order to UI list, size now: " + allOrdersList.size());
+            orderTable.refresh();
+            updatePriceDisplay();
+        });
     });
 }
+
+
 
 }
