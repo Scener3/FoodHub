@@ -20,7 +20,7 @@ public class OrderProcessor {
         List<Order> allOrder = new ArrayList<>();
 
         if (allFiles.isEmpty()) {
-            System.out.println("No order to process");
+            System.out.println("No orders to process");
             return allOrder;
         }
         for (String file : allFiles){
