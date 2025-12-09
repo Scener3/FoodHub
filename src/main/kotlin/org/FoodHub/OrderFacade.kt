@@ -1,6 +1,5 @@
 package org.FoodHub
 
-import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.json.simple.parser.ParseException
 import org.xml.sax.SAXException

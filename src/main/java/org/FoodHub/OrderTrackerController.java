@@ -12,9 +12,9 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import org.json.simple.parser.ParseException;
 import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
-import java.awt.*;
+
 import javafx.scene.control.Label;
-import java.io.File;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
