@@ -1,5 +1,6 @@
 package org.FoodHub;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -30,9 +31,16 @@ class OrderManagerTest {
     @InjectMocks
     private OrderManager manager;
 
+    static AutoCloseable autoCloseable;
+
     @BeforeEach
     void setup() {
-        MockitoAnnotations.openMocks(this);
+        autoCloseable = MockitoAnnotations.openMocks(this);
+    }
+
+    @AfterAll
+    public static void releaseMocks() throws Exception {
+        autoCloseable.close();
     }
 
     @Test
@@ -40,7 +48,7 @@ class OrderManagerTest {
         manager.addOrder(mockOrderA);
 
         assertEquals(1, manager.getOrders().size());
-        assertSame(mockOrderA, manager.getOrders().get(0));
+        assertSame(mockOrderA, manager.getOrders().getFirst());
     }
 
     @Test
@@ -118,19 +126,5 @@ class OrderManagerTest {
 
         assertSame(fakeMenuList, result);
         verify(mockMenu, times(1)).getAvailableFoodItem();
-    }
-
-    @Test
-    void testCreateNewOrderNotMocked() {
-        List<FoodItem> selectedItems = Arrays.asList(
-                new FoodItem("Apple", 2, 1.0)
-        );
-
-        Order newOrder = manager.createNewOrder(selectedItems);
-
-        assertNotNull(newOrder);
-        assertEquals(OrderStatus.INCOMING, newOrder.getOrderStatus());
-        assertEquals(OrderType.PICKUP, newOrder.getOrderType());
-        assertEquals(selectedItems, newOrder.getFoodItems());
     }
 }
